@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KA盟数据周报 — 2026.6.1~6.7</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #0f1117; --bg-panel: #161822; --bg-card: #1c1f2e;
+  --border: #2a2e3f; --text: #e1e4ed; --text-muted: #7c8299;
+  --accent: #4a6cf7; --accent2: #f59e0b; --green: #22c55e; --red: #ef4444;
+  --radius: 8px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system,"PingFang SC","Microsoft YaHei",sans-serif; background: var(--bg); color: var(--text); padding: 24px 32px; max-width: 1400px; margin: 0 auto; }
+h1 { font-size: 26px; margin-bottom: 4px; background: linear-gradient(135deg, #f59e0b, #e879f9); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.subtitle { color: var(--text-muted); font-size: 14px; margin-bottom: 32px; }
+h2 { font-size: 20px; margin: 40px 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+h2 .num { background: var(--accent); color: #fff; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 12px; margin-bottom: 20px; }
+.kpi { background: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+.kpi .label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+.kpi .value { font-size: 28px; font-weight: 700; }
+.kpi .sub { font-size: 12px; margin-top: 4px; }
+.kpi .sub.up { color: var(--green); } .kpi .sub.down { color: var(--red); }
+.kpi .sub.neutral { color: var(--text-muted); }
+.dual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+@media (max-width: 900px) { .dual-grid { grid-template-columns: 1fr; } }
+.chart-box { background: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+.chart-box h3 { font-size: 14px; margin-bottom: 12px; color: var(--text-muted); }
+.chart-box canvas { max-height: 300px; }
+table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
+th { background: #1a1d27; padding: 10px 12px; text-align: left; font-weight: 600; color: var(--text-muted); border-bottom: 2px solid var(--border); }
+td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+tr:hover td { background: rgba(74,108,247,0.05); }
+.num-col { text-align: right; font-variant-numeric: tabular-nums; }
+.section-note { background: rgba(245,158,11,0.08); border-left: 3px solid var(--accent2); padding: 12px 16px; border-radius: 0 var(--radius) var(--radius) 0; margin-bottom: 20px; font-size: 13px; color: var(--text-muted); }
+table.small { font-size: 12px; }
+table.small td, table.small th { padding: 6px 8px; }
+.rank-badge { display: inline-block; width: 22px; height: 22px; border-radius: 50%; text-align: center; line-height: 22px; font-size: 12px; font-weight: 700; margin-right: 6px; flex-shrink: 0; }
+.rank-1 { background: linear-gradient(135deg,#f59e0b,#eab308); color:#000; }
+.rank-2 { background: #94a3b8; color:#fff; }
+.rank-3 { background: #b45309; color:#fff; }
+.rank-n { background: rgba(74,108,247,0.2); color: var(--accent); }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 500; }
+.tag-up { background: rgba(34,197,94,0.15); color: var(--green); }
+.tag-down { background: rgba(239,68,68,0.15); color: var(--red); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+.player-row { display: flex; align-items: center; gap: 2px; }
+</style>
+</head>
+<body>
+
+<div id="pw-gate" style="position:fixed;inset:0;background:#0f1117;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;">
+  <div style="text-align:center;">
+    <h1 style="color:#f59e0b;font-size:28px;margin-bottom:8px;">📊 KA盟数据周报</h1>
+    <p style="color:#7c8299;font-size:14px;margin-bottom:24px;">2026.6.1 ~ 6.7 · 访问需口令</p>
+    <input type="password" id="pw-input" placeholder="请输入访问口令" 
+      style="width:260px;padding:12px 16px;background:#1c1f2e;border:1px solid #2a2e3f;border-radius:8px;color:#e1e4ed;font-size:15px;outline:none;text-align:center;margin-bottom:12px;"
+      onkeydown="if(event.key==='Enter')checkPw()">
+    <br>
+    <button onclick="checkPw()" style="padding:10px 40px;background:#4a6cf7;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">确认</button>
+    <p id="pw-error" style="color:#ef4444;font-size:12px;margin-top:12px;display:none;">口令错误，请重试</p>
+  </div>
+</div>
+<script>
+const CORRECT_PW = 'ka2026'  <!-- 修改此处更换口令 -->;
+function checkPw(){
+  const input = document.getElementById('pw-input').value;
+  if(input === CORRECT_PW){
+    document.getElementById('pw-gate').style.display = 'none';
+    sessionStorage.setItem('ka_auth','1');
+  } else {
+    document.getElementById('pw-error').style.display = 'block';
+    document.getElementById('pw-input').value = '';
+  }
+}
+// Auto-unlock if already authenticated
+if(sessionStorage.getItem('ka_auth') === '1'){
+  document.getElementById('pw-gate').style.display = 'none';
+}
+</script>
+
+
+<h1>📊 KA盟数据周报</h1>
+<div class="subtitle">数据周期：2026年6月1日 ~ 6月7日（上周：5月25日~5月31日） · 生成时间：2026-06-12</div>
+
+<!-- ===== 1. 用户分析 ===== -->
+<h2><span class="num">1</span> 用户分析</h2>
+
+<div class="kpi-grid">
+  <div class="kpi"><div class="label">本周注册总人数</div><div class="value">45</div><div class="sub down">↓ -55.4% vs 上周(101)</div></div>
+  <div class="kpi"><div class="label">上周注册总人数</div><div class="value">101</div><div class="sub neutral">差值 -56</div></div>
+  <div class="kpi"><div class="label">支持用户</div><div class="value">1</div><div class="sub neutral">上周 0</div></div>
+  <div class="kpi"><div class="label">热情用户</div><div class="value">0</div><div class="sub neutral">上周 0</div></div>
+</div>
+
+<div class="two-col">
+  <div>
+    <h3 style="font-size:14px;color:var(--text-muted);margin-bottom:8px;">本周新注册用户分类</h3>
+    <table>
+      <tr><th>用户类型</th><th>本周</th><th>上周</th><th>变化</th></tr>
+      <tr><td>恶意用户</td><td class="num-col">11</td><td class="num-col">15</td><td class="num-col"><span class="tag tag-up">-4</span></td></tr>
+      <tr><td>沉睡用户</td><td class="num-col">31</td><td class="num-col">83</td><td class="num-col"><span class="tag tag-down">-52</span></td></tr>
+      <tr><td>休眠用户</td><td class="num-col">0</td><td class="num-col">1</td><td class="num-col">-1</td></tr>
+      <tr><td>冷淡用户</td><td class="num-col">2</td><td class="num-col">2</td><td class="num-col">0</td></tr>
+      <tr><td>支持用户</td><td class="num-col">1</td><td class="num-col">0</td><td class="num-col"><span class="tag tag-up">+1</span></td></tr>
+      <tr><td>热情用户</td><td class="num-col">0</td><td class="num-col">0</td><td class="num-col">0</td></tr>
+    </table>
+  </div>
+  <div>
+    <h3 style="font-size:14px;color:var(--text-muted);margin-bottom:8px;">本周累计用户Level分布 vs 上周</h3>
+    <table>
+      <tr><th>用户类型</th><th>Level</th><th>本周累计</th><th>上周累计</th><th>变化</th></tr>
+      <tr><td>恶意用户</td><td class="num-col">-2</td><td class="num-col">1,195</td><td class="num-col">813</td><td class="num-col"><span class="tag tag-down">+382</span></td></tr>
+      <tr><td>沉睡用户</td><td class="num-col">-1</td><td class="num-col">1,389</td><td class="num-col">1,759</td><td class="num-col"><span class="tag tag-up">-370</span></td></tr>
+      <tr><td>休眠用户</td><td class="num-col">1</td><td class="num-col">850</td><td class="num-col">833</td><td class="num-col">+17</td></tr>
+      <tr><td>冷淡用户</td><td class="num-col">2</td><td class="num-col">565</td><td class="num-col">576</td><td class="num-col">-11</td></tr>
+      <tr><td>支持用户</td><td class="num-col">3</td><td class="num-col">128</td><td class="num-col">137</td><td class="num-col">-9</td></tr>
+      <tr><td>热情用户</td><td class="num-col">4</td><td class="num-col">163</td><td class="num-col">159</td><td class="num-col">+4</td></tr>
+      <tr style="font-weight:600;border-top:2px solid var(--border)"><td>合计</td><td></td><td class="num-col">4,290</td><td class="num-col">4,277</td><td class="num-col">+13</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="section-note">※ 恶意用户大幅增加(+382)、沉睡用户减少(-370)，疑似两期间存在用户Level重分类。本周净增13用户。</div>
+
+<div class="two-col">
+  <div>
+    <h3 style="font-size:14px;color:var(--text-muted);margin-bottom:8px;">各店铺初始玩家数 Top15（截至6.7）</h3>
+    <table class="small">
+      <tr><th>#</th><th>店铺</th><th>初始玩家</th></tr>
+      <tr><td>1</td><td>御三家</td><td class="num-col">126</td></tr>
+      <tr><td>2</td><td>M3</td><td class="num-col">126</td></tr>
+      <tr><td>3</td><td>白鸽</td><td class="num-col">100</td></tr>
+      <tr><td>4</td><td>Jin伊卫</td><td class="num-col">99</td></tr>
+      <tr><td>5</td><td>XKA</td><td class="num-col">84</td></tr>
+      <tr><td>6</td><td>优极客卡牌</td><td class="num-col">74</td></tr>
+      <tr><td>7</td><td>gambit</td><td class="num-col">65</td></tr>
+      <tr><td>8</td><td>钢铁国度</td><td class="num-col">60</td></tr>
+      <tr><td>9</td><td>空岛</td><td class="num-col">60</td></tr>
+      <tr><td>10</td><td>卡乐</td><td class="num-col">52</td></tr>
+      <tr><td>11</td><td>妥妥哒</td><td class="num-col">50</td></tr>
+      <tr><td>12</td><td>无限大-奉贤万景峰</td><td class="num-col">44</td></tr>
+      <tr><td>13</td><td>玩具坑博物馆</td><td class="num-col">40</td></tr>
+      <tr><td>14</td><td>KA盟</td><td class="num-col">39</td></tr>
+      <tr><td>15</td><td>AT卡牌</td><td class="num-col">39</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="section-note">※ 「初始玩家」定义：用户历史上首次获得积分的店铺，截至2026年6月7日。KA盟代发积分已从remark解析实际店铺。</div>
+
+<!-- ===== 2. TCG分析 ===== -->
+<h2><span class="num">2</span> TCG分析</h2>
+
+<div class="kpi-grid">
+  <div class="kpi"><div class="label">活跃用户总数 (Level=3/4)</div><div class="value">291</div><div class="sub neutral">支持128 + 热情163</div></div>
+  <div class="kpi"><div class="label">本周新增活跃用户</div><div class="value">1</div><div class="sub neutral">支持用户</div></div>
+  <div class="kpi"><div class="label">本周KA盟积分赛</div><div class="value">26</div><div class="sub neutral">去重后场次 (is_pointed=1)</div></div>
+  <div class="kpi"><div class="label">新参与TCG人数(本周)</div><div class="value">13</div><div class="sub neutral">洛卡纳1+符文8+GCG1+峡谷3</div></div>
+</div>
+
+<h3 style="font-size:14px;color:var(--text-muted);margin-bottom:8px;">各TCG参与积分赛人数（本周 vs 上周）</h3>
+<table>
+  <tr><th>TCG</th><th>本周参赛</th><th>上周参赛</th><th>变化</th><th>新参与</th><th>流失率</th></tr>
+  <tr><td>洛卡纳</td><td class="num-col">38</td><td class="num-col">29</td><td class="num-col"><span class="tag tag-up">+9</span></td><td class="num-col">1</td><td class="num-col">69.46%</td></tr>
+  <tr><td>符文战场</td><td class="num-col">97</td><td class="num-col">77</td><td class="num-col"><span class="tag tag-up">+20</span></td><td class="num-col">8</td><td class="num-col">70.87%</td></tr>
+  <tr><td>高达GCG</td><td class="num-col">52</td><td class="num-col">44</td><td class="num-col"><span class="tag tag-up">+8</span></td><td class="num-col">1</td><td class="num-col">55.85%</td></tr>
+  <tr><td>峡谷争锋</td><td class="num-col">45</td><td class="num-col">47</td><td class="num-col"><span class="tag tag-down">-2</span></td><td class="num-col">3</td><td class="num-col">65.88%</td></tr>
+</table>
+
+<div class="two-col">
+  <div class="chart-box"><h3>各TCG参与积分赛人数对比</h3><canvas id="chart1"></canvas></div>
+  <div class="chart-box"><h3>各TCG流失率</h3><canvas id="chart2"></canvas></div>
+</div>
+
+<h3 style="font-size:14px;color:var(--text-muted);margin:16px 0 8px;">各TCG活跃度 Top5 玩家（按每周积分赛参与天数）</h3>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">
+  <div><table class="small"><tr><th colspan="2">🏆 洛卡纳 <span style="font-weight:400;color:var(--text-muted)">32人</span></th></tr>
+    <tr><td><div class="player-row"><span class="rank-badge rank-1">1</span>QUEST.哈路卡</div></td><td class="num-col">3次</td></tr>
+    <tr><td><div class="player-row"><span class="rank-badge rank-2">2</span>QUEST·倾人城</div></td><td class="num-col">3次</td></tr>
+    <tr><td><div class="player-row"><span class="rank-badge rank-3">3</span>Jin伊卫.三撮毛娜娜</div></td><td class="num-col">3次</td></tr>
+    <tr><td><div class="player-row"><span class="rank-badge rank-n">4</span>QUEST.Lucia</div></td><td class="num-col">3次</td></tr>
+    <tr><td><div class="player-row"><span class="rank-badge rank-n">5</span>FISH·穆oon</div></td><td class="num-col">2次</td></tr>
+  </table></div>
+  <div><table class="small"><tr><th colspan="2">🏆 符文战场 <span style="font-weight:400;color:var(--text-muted)">97人</span></th></tr>
+    <tr><td><div class="player-row"><span class="rank-badge rank-1">1</span>风清云散</div></td><td class="num-col">4次</td></tr>
+    <tr><td><div class="player-row"><span class="rank-badge rank-2">2</span>HeeroChris</div></td><td class="num-col">3次</td></tr>
+    <tr><td><div class="player-row"><span class="rank-badge rank-3">3</span>clark</div></td><td class="num-col">2次</td></tr>
+    <tr><td><div class="player-row"><span class="rank-badge rank-n">4</span>俩柒</div></td><td class="num-col">2次</td></tr>
+    <tr><td><div class="player-row"><span class="rank-badge rank-n">5</span>hishiro</div></td><td class="num-col">2次</td></tr>
+  </table></div>
+  <div><table class="small"><tr><th colspan="2">🏆 高达GCG <span style="font-weight:400;color:var(--text-muted)">50人</span></th></tr>
+    <tr><td><div class="player-row"><span class="rank-badge rank-1">1</span>御坂</div></td><td class="num-col">3次</td></tr>
+    <tr><td><div class="player-row"><span class="rank-badge rank-2">2</span>断网的土豆君</div></td><td class="num-col">2次</td></tr>
+    <tr><td><div class="player-row"><span class="rank-badge rank-3">3</span>KokoS</div></td><td class="num-col">2次</td></tr>
+    <tr><td><div class="player-row"><span class="rank-badge rank-n">4</span>银河萝莉</div></td><td class="num-col">2次</td></tr>
+    <tr><td><div class="player-row"><span class="rank-badge rank-n">5</span>，1</div></td><td class="num-col">2次</td></tr>
+  </table></div>
+  <div><table class="small"><tr><th colspan="2">🏆 峡谷争锋 <span style="font-weight:400;color:var(--text-muted)">44人</span></th></tr>
+    <tr><td><div class="player-row"><span class="rank-badge rank-1">1</span>帕拉丁</div></td><td class="num-col">3次</td></tr>
+    <tr><td><div class="player-row"><span class="rank-badge rank-2">2</span>可乐</div></td><td class="num-col">3次</td></tr>
+    <tr><td><div class="player-row"><span class="rank-badge rank-3">3</span>御三家.鱼</div></td><td class="num-col">2次</td></tr>
+    <tr><td><div class="player-row"><span class="rank-badge rank-n">4</span>JE.糟熘鱼片</div></td><td class="num-col">2次</td></tr>
+    <tr><td><div class="player-row"><span class="rank-badge rank-n">5</span>Dorom</div></td><td class="num-col">2次</td></tr>
+  </table></div>
+</div>
+
+<div class="section-note">※ 统计口径：从 point_log 中取 remark 含「积分赛」的 action=1 记录，按 user_id + category_id + 日期去重（每个玩家每天每种TCG只算1次），start_time 判断日期。万智牌本周仅1人参与1天，未单列。</div>
+
+<!-- ===== 3. 积分 ===== -->
+<h2><span class="num">3</span> 积分</h2>
+
+<div class="kpi-grid">
+  <div class="kpi"><div class="label">本周净发放积分</div><div class="value">493</div><div class="sub neutral">发放516 - action5扣减23</div></div>
+  <div class="kpi"><div class="label">本周消耗积分</div><div class="value" style="color:var(--red)">144</div><div class="sub neutral">action=2兑换 + action=4活动</div></div>
+  <div class="kpi"><div class="label">净增加积分</div><div class="value" style="color:var(--green)">+349</div><div class="sub neutral">净发放493 - 消耗144</div></div>
+  <div class="kpi"><div class="label">发放记录数</div><div class="value">367</div><div class="sub neutral">本周point_log记录</div></div>
+</div>
+
+<div class="section-note">※ 积分发放时间：action=1 优先取 start_time（比赛日期），无 start_time 回退 ctime；action=2/4/5 直接取 ctime。修正后 WS 本周发放=0（ctime在6.1后但start_time在5月底）。</div>
+
+<div class="two-col">
+  <div class="chart-box"><h3>各TCG积分发放分布</h3><canvas id="chart3"></canvas></div>
+  <div class="chart-box"><h3>各店铺积分发放 Top10</h3><canvas id="chart4"></canvas></div>
+</div>
+
+<h3 style="font-size:14px;color:var(--text-muted);margin-bottom:8px;">各TCG积分发放明细</h3>
+<table>
+  <tr><th>TCG</th><th>发放积分</th><th>占比</th><th>Top1店铺</th></tr>
+  <tr><td>符文战场</td><td class="num-col">194</td><td class="num-col">38.5%</td><td>Gambit (36)</td></tr>
+  <tr><td>高达GCG</td><td class="num-col">115</td><td class="num-col">22.8%</td><td>银河卡站 (26)</td></tr>
+  <tr><td>峡谷争锋</td><td class="num-col">109</td><td class="num-col">21.6%</td><td>JE (41)</td></tr>
+  <tr><td>洛卡纳</td><td class="num-col">85</td><td class="num-col">16.9%</td><td>Jin伊卫 (24)</td></tr>
+  <tr><td>万智牌</td><td class="num-col">1</td><td class="num-col">0.2%</td><td>M3 (1)</td></tr>
+</table>
+
+<h3 style="font-size:14px;color:var(--text-muted);margin:16px 0 8px;">各TCG参赛人数中位数（is_pointed=1 + KA盟积分赛，仅统计参赛>0的比赛）</h3>
+<table>
+  <tr><th>TCG</th><th>有效场次</th><th>参赛人数中位数</th><th>绑定人数中位数</th></tr>
+  <tr><td>峡谷争锋</td><td class="num-col">5</td><td class="num-col">15</td><td class="num-col">7</td></tr>
+  <tr><td>符文战场</td><td class="num-col">10</td><td class="num-col">10</td><td class="num-col">10</td></tr>
+  <tr><td>洛卡纳</td><td class="num-col">5</td><td class="num-col">9</td><td class="num-col">8</td></tr>
+  <tr><td>高达GCG</td><td class="num-col">6</td><td class="num-col">9</td><td class="num-col">8</td></tr>
+  <tr><td>WS</td><td class="num-col">0</td><td class="num-col">-</td><td class="num-col">-</td></tr>
+</table>
+
+<div class="section-note">※ 比赛筛选条件：is_pointed=1、dtime=epoch、name含「KA盟」+「积分赛」（KA大小写不敏感）、start_time在本周。</div>
+
+<h3 style="font-size:14px;color:var(--text-muted);margin:16px 0 8px;">各TCG各店铺比赛明细（参赛人数 / 绑定人数）</h3>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;">
+  <div><table class="small"><tr><th colspan="3">洛卡纳（5场）</th></tr><tr><th>店铺</th><th>日期</th><th>参赛/绑定</th></tr>
+    <tr><td>Jin伊卫</td><td>6.3</td><td class="num-col">16/15</td></tr>
+    <tr><td>Fairy Loong</td><td>6.4</td><td class="num-col">9/9</td></tr>
+    <tr><td>M3</td><td>6.2</td><td class="num-col">9/8</td></tr>
+    <tr><td>百可梦卡牌俱乐部</td><td>6.3</td><td class="num-col">6/6</td></tr>
+    <tr><td>时光卡藏</td><td>6.1</td><td class="num-col">6/5</td></tr>
+  </table></div>
+
+  <div><table class="small"><tr><th colspan="3">符文战场（10场）</th></tr><tr><th>店铺</th><th>日期</th><th>参赛/绑定</th></tr>
+    <tr><td>Gambit</td><td>6.3</td><td class="num-col">29/27</td></tr>
+    <tr><td>THE BIG M HOBBY</td><td>6.3</td><td class="num-col">14/14</td></tr>
+    <tr><td>幻守卡牌</td><td>6.1</td><td class="num-col">13/11</td></tr>
+    <tr><td>AT卡牌</td><td>6.2</td><td class="num-col">12/9</td></tr>
+    <tr><td>无限大-宝山百联</td><td>6.2</td><td class="num-col">11/5</td></tr>
+    <tr><td>优极客卡牌</td><td>6.4</td><td class="num-col">10/10</td></tr>
+    <tr><td>Jin伊卫</td><td>6.5</td><td class="num-col">10/10</td></tr>
+    <tr><td>M3</td><td>6.7</td><td class="num-col">10/10</td></tr>
+    <tr><td>青钢卡牌</td><td>6.6</td><td class="num-col">9/6</td></tr>
+    <tr><td>XKA</td><td>6.3</td><td class="num-col">8/7</td></tr>
+  </table></div>
+
+  <div><table class="small"><tr><th colspan="3">高达GCG（6场）</th></tr><tr><th>店铺</th><th>日期</th><th>参赛/绑定</th></tr>
+    <tr><td>银河卡站</td><td>6.3</td><td class="num-col">20/17</td></tr>
+    <tr><td>钢铁国度</td><td>6.4</td><td class="num-col">14/13</td></tr>
+    <tr><td>XKA</td><td>6.1</td><td class="num-col">10/9</td></tr>
+    <tr><td>泥头车</td><td>6.4</td><td class="num-col">8/8</td></tr>
+    <tr><td>空岛</td><td>6.3</td><td class="num-col">8/7</td></tr>
+    <tr><td>无限大-奉贤万景峰</td><td>6.7</td><td class="num-col">8/7</td></tr>
+  </table></div>
+
+  <div><table class="small"><tr><th colspan="3">峡谷争锋（5场）</th></tr><tr><th>店铺</th><th>日期</th><th>参赛/绑定</th></tr>
+    <tr><td>御三家</td><td>6.5</td><td class="num-col">24/18</td></tr>
+    <tr><td>JE</td><td>6.3</td><td class="num-col">17/15</td></tr>
+    <tr><td>泥头车</td><td>6.7</td><td class="num-col">15/7</td></tr>
+    <tr><td>无限大-奉贤万景峰</td><td>6.2</td><td class="num-col">9/6</td></tr>
+    <tr><td>空岛</td><td>6.2</td><td class="num-col">7/7</td></tr>
+  </table></div>
+</div>
+
+<div class="section-note">※ WS、数码宝贝、携战之境、航海王、影之诗、宝可梦本周无符合条件的比赛。</div>
+
+<!-- ===== 4. 积分商城 ===== -->
+<h2><span class="num">4</span> 积分商城</h2>
+
+<h3 style="font-size:14px;color:var(--text-muted);margin-bottom:8px;">各期积分商城加权兑换率（价值/积分，按库存加权，价值优先当前单位市值）</h3>
+<table>
+  <tr><th>期数</th><th>品类</th><th>商品数</th><th>加权兑换率</th><th>最高兑换率</th><th>最低兑换率</th></tr>
+  <tr><td rowspan="4">默认商城<br><small>5.9上线</small></td><td>金色限时</td><td class="num-col">7</td><td class="num-col">74.61</td><td>143 (武则天kr)</td><td>29 (皮卡丘PSA10)</td></tr>
+  <tr><td>银色限时</td><td class="num-col">8</td><td class="num-col">22.02</td><td>53 (洛卡纳11弹)</td><td>12 (瑟提铁拳)</td></tr>
+  <tr><td>铜色限时</td><td class="num-col">11</td><td class="num-col">20.81</td><td>35 (夜阑谣)</td><td>10 (OHANA)</td></tr>
+  <tr><td><b>全部</b></td><td class="num-col"><b>26</b></td><td class="num-col"><b>28.61</b></td><td>143</td><td>10</td></tr>
+  <tr><td rowspan="4">首次刷新<br><small>5.10上线</small></td><td>金色限时</td><td class="num-col">6</td><td class="num-col">74.56</td><td>111 (莉莉艾PSA)</td><td>35 (迪士尼徽章)</td></tr>
+  <tr><td>银色限时</td><td class="num-col">7</td><td class="num-col">29.72</td><td>67 (CLARABELLE)</td><td>10 (孙膑KR)</td></tr>
+  <tr><td>铜色限时</td><td class="num-col">20</td><td class="num-col">14.26</td><td>40 (反击捕捉器)</td><td>7 (龙盾)</td></tr>
+  <tr><td><b>全部</b></td><td class="num-col"><b>33</b></td><td class="num-col"><b>23.26</b></td><td>111</td><td>7</td></tr>
+  <tr><td rowspan="4">5.31刷新<br><small>5.31上线</small></td><td>金色限时</td><td class="num-col">16</td><td class="num-col">71.09</td><td>120 (诸葛亮kr)</td><td>2 (毛伊enc)</td></tr>
+  <tr><td>银色限时</td><td class="num-col">25</td><td class="num-col">41.70</td><td>83 (丝翠海文)</td><td>4 (阿尔贝尔)</td></tr>
+  <tr><td>铜色限时</td><td class="num-col">48</td><td class="num-col">32.33</td><td>95 (波尔萨利诺)</td><td>2 (沙漠蜻蜓)</td></tr>
+  <tr><td><b>全部</b></td><td class="num-col"><b>89</b></td><td class="num-col"><b>39.95</b></td><td>120</td><td>2</td></tr>
+  <tr><td rowspan="4">6.1节日<br><small>6.1上线</small></td><td>金色限时</td><td class="num-col">4</td><td class="num-col">24.41</td><td>33 (皎月女神)</td><td>8 (毛伊英雄)</td></tr>
+  <tr><td>银色限时</td><td class="num-col">3</td><td class="num-col">7.08</td><td>30 (希苏水龙)</td><td>3 (12弹散包)</td></tr>
+  <tr><td>铜色限时</td><td class="num-col">5</td><td class="num-col">14.57</td><td>60 (2弹散包×6)</td><td>5 (后羿cr)</td></tr>
+  <tr><td><b>全部</b></td><td class="num-col"><b>12</b></td><td class="num-col"><b>13.99</b></td><td>60</td><td>3</td></tr>
+</table>
+
+<div class="chart-box" style="margin-top:16px;"><h3>各期积分商城加权兑换率对比</h3><canvas id="chart5"></canvas></div>
+
+<hr style="border-color:var(--border);margin:40px 0 16px;">
+<div style="text-align:center;color:var(--text-muted);font-size:12px;">KA盟数据周报 · 自动生成 · 2026-06-12</div>
+
+<script>
+const colors = ['#4a6cf7','#f59e0b','#22c55e','#ef4444','#a78bfa','#f97316','#06b6d4','#e879f9','#84cc16','#f43f5e','#8b5cf6'];
+
+new Chart(document.getElementById('chart1'), {
+  type: 'bar',
+  data: {
+    labels: ['洛卡纳','符文战场','高达GCG','峡谷争锋'],
+    datasets: [
+      {label:'本周',data:[38,97,52,45],backgroundColor:'#4a6cf7',borderRadius:4},
+      {label:'上周',data:[29,77,44,47],backgroundColor:'rgba(74,108,247,0.3)',borderRadius:4}
+    ]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:'#7c8299'}}},
+    scales:{x:{ticks:{color:'#7c8299'}},y:{ticks:{color:'#7c8299'},grid:{color:'#2a2e3f'}}}
+  }
+});
+
+new Chart(document.getElementById('chart2'), {
+  type: 'bar',
+  data: {
+    labels: ['洛卡纳','符文战场','高达GCG','峡谷争锋'],
+    datasets: [{label:'流失率(%)',data:[69.46,70.87,55.85,65.88],
+      backgroundColor:['#ef4444','#f97316','#f59e0b','#a78bfa'],borderRadius:4}]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{display:false}},
+    scales:{x:{ticks:{color:'#7c8299'}},y:{ticks:{color:'#7c8299'},grid:{color:'#2a2e3f'},max:100}}
+  }
+});
+
+new Chart(document.getElementById('chart3'), {
+  type: 'doughnut',
+  data: {
+    labels: ['符文战场(194)','高达GCG(115)','峡谷争锋(109)','洛卡纳(85)','万智牌(1)'],
+    datasets: [{data:[194,115,109,85,1],backgroundColor:colors,borderColor:'#0f1117',borderWidth:2}]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{position:'bottom',labels:{color:'#7c8299',padding:12}}}
+  }
+});
+
+new Chart(document.getElementById('chart4'), {
+  type: 'bar',
+  data: {
+    labels: ['Jin伊卫','JE','Gambit','M3','空岛','XKA','无限大','泥头车','银河卡站','御三家'],
+    datasets: [{label:'发放积分',data:[43,41,36,34,32,31,31,30,26,24],
+      backgroundColor:'#f59e0b',borderRadius:4}]
+  },
+  options: {
+    indexAxis:'y', responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{display:false}},
+    scales:{x:{ticks:{color:'#7c8299'},grid:{color:'#2a2e3f'}},y:{ticks:{color:'#7c8299'}}}
+  }
+});
+
+new Chart(document.getElementById('chart5'), {
+  type: 'bar',
+  data: {
+    labels: ['默认商城','首次刷新','5.31刷新','6.1节日'],
+    datasets: [
+      {label:'金色限时',data:[74.61,74.56,71.09,24.41],backgroundColor:'#f59e0b',borderRadius:4},
+      {label:'银色限时',data:[22.02,29.72,41.70,7.08],backgroundColor:'#94a3b8',borderRadius:4},
+      {label:'铜色限时',data:[20.81,14.26,32.33,14.57],backgroundColor:'#92400e',borderRadius:4},
+      {label:'全部加权',data:[28.61,23.26,39.95,13.99],backgroundColor:'#4a6cf7',borderRadius:4}
+    ]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:'#7c8299'}}},
+    scales:{x:{ticks:{color:'#7c8299'}},y:{ticks:{color:'#7c8299'},grid:{color:'#2a2e3f'},title:{display:true,text:'兑换率(价值/积分)',color:'#7c8299'}}}
+  }
+});
+</script>
+</body>
+</html>
